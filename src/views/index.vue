@@ -4,26 +4,26 @@
     <div class="home-body">
       <div class="sider">
         <a-menu
-          style="width: 256px"
+          style="width: 10vw"
           :default-selected-keys="['1']"
           :open-keys.sync="openKeys"
           mode="inline"
           @click="handleClick"
         >
           <a-menu-item key="1" @titleClick="titleClick">
-            <a-icon type="pie-chart" />
-            <span>Option 1</span>
+            <a-icon type="home" />
+            <span>首页</span>
           </a-menu-item>
           <a-sub-menu key="sub2" @titleClick="titleClick">
             <span slot="title"
-              ><a-icon type="appstore" /><span>Navigation Two</span></span
+              ><a-icon type="account-book" /><span>收入与支出</span></span
             >
-            <a-menu-item key="5"> Option 5 </a-menu-item>
-            <a-menu-item key="6"> Option 6 </a-menu-item>
+            <a-menu-item key="5">记录</a-menu-item>
+            <a-menu-item key="6">查询</a-menu-item>
           </a-sub-menu>
           <a-sub-menu key="sub4">
             <span slot="title"
-              ><a-icon type="setting" /><span>Navigation Three</span></span
+              ><a-icon type="idcard" /><span>供应商</span></span
             >
             <a-menu-item key="9"> Option 9 </a-menu-item>
             <a-menu-item key="10"> Option 10 </a-menu-item>
@@ -32,13 +32,16 @@
           </a-sub-menu>
         </a-menu>
       </div>
-      <div class="content"></div>
+      <div class="content">
+        <HomePage></HomePage>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
+import HomePage from "../components/homePage";
 export default {
   name: "homePage",
   data() {
@@ -46,6 +49,9 @@ export default {
       current: ["mail"],
       openKeys: ["sub1"],
     };
+  },
+  components: {
+    HomePage,
   },
   watch: {
     openKeys(val) {
@@ -67,21 +73,17 @@ export default {
 .home-page {
   .home-header {
     width: 100%;
-    height: 80px;
-    background-color: pink;
+    height: 8vh;
+    background-color: #2a5caa;
   }
   .home-body {
     display: flex;
     width: 100%;
     .sider {
-      width: 256px;
-      //   background-color: skyblue;
-      //   height: 50vh;
+      width: 10vw;
     }
     .content {
-      background-color: green;
-      //   width: 80vw;
-        flex-grow: 1;
+      flex-grow: 1;
       height: 50vh;
     }
   }

@@ -1,4 +1,4 @@
-# kitchen-helper
+# greenmoon-account-web
 
 ## Project setup
 ```
