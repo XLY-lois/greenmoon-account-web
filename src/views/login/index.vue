@@ -5,9 +5,9 @@
         <el-tab-pane label="登录" name="loginPage">
           <LoginForm></LoginForm>
         </el-tab-pane>
-        <el-tab-pane label="注册" name="registerPage">
+        <!-- <el-tab-pane label="注册" name="registerPage">
           <RegisterForm></RegisterForm>
-        </el-tab-pane>
+        </el-tab-pane> -->
       </el-tabs>
     </div>
 

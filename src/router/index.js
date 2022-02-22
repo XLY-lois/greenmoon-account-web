@@ -1,24 +1,44 @@
 import Vue from 'vue'
-import VueRouter from 'vue-router'
-import homePage from '../views/homePage.vue'
+import Router from 'vue-router'
+import Index from '../views/index'
+import Login from '../views/login'
+// import UserInfo from './views/userInfo'
+// import Contribute from './views/contribute'
+import NotFound from '../views/notFound'
 
-Vue.use(VueRouter)
 
-const routes = [
-  {
-    path: '/',
-    name: 'Home',
-    component: homePage
-  },
-  // {
-  //   path: '/about',
-  //   name: 'About',
-  //   component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  // }
-]
+Vue.use(Router)
 
-const router = new VueRouter({
-  routes
+export default new Router({
+  routes: [
+    {
+      path: '/',
+      name: 'login',
+      component: Login
+    },
+    {
+      path: '/homepage',
+      name: 'homepage',
+      component: Index
+      // route level code-splitting
+      // this generates a separate chunk (about.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      // component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
+    },
+    // {
+    //   path: '/userInfo',
+    //   name: 'userInfo',
+    //   component: UserInfo
+    // },
+    // {
+    //   path: '/contribute',
+    //   name: 'contribute',
+    //   component: Contribute
+    // },
+    {
+      path: '*',
+      name: 'notFound',
+      component: NotFound
+    }
+  ]
 })
-
-export default router

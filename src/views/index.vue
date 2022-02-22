@@ -14,26 +14,22 @@
             <a-icon type="home" />
             <span>首页</span>
           </a-menu-item>
-          <a-sub-menu key="sub2" @titleClick="titleClick">
+          <a-sub-menu key="2" @titleClick="titleClick">
             <span slot="title"
               ><a-icon type="account-book" /><span>收入与支出</span></span
             >
-            <a-menu-item key="5">记录</a-menu-item>
-            <a-menu-item key="6">查询</a-menu-item>
+            <a-menu-item key="2-1">记录</a-menu-item>
+            <a-menu-item key="2-2">查询</a-menu-item>
           </a-sub-menu>
-          <a-sub-menu key="sub4">
-            <span slot="title"
-              ><a-icon type="idcard" /><span>供应商</span></span
-            >
-            <a-menu-item key="9"> Option 9 </a-menu-item>
-            <a-menu-item key="10"> Option 10 </a-menu-item>
-            <a-menu-item key="11"> Option 11 </a-menu-item>
-            <a-menu-item key="12"> Option 12 </a-menu-item>
-          </a-sub-menu>
+          <a-menu-item key="3" @titleClick="titleClick">
+            <a-icon type="idcard" />
+            <span>供应商</span>
+          </a-menu-item>
         </a-menu>
       </div>
       <div class="content">
-        <HomePage></HomePage>
+        <HomePage v-if="current == '1'"></HomePage>
+        <SupplierPage v-if="current == '3'"></SupplierPage>
       </div>
     </div>
   </div>
@@ -42,6 +38,8 @@
 <script>
 // @ is an alias to /src
 import HomePage from "../components/homePage";
+import SupplierPage from "../components/supplierPage";
+
 export default {
   name: "homePage",
   data() {
@@ -52,6 +50,7 @@ export default {
   },
   components: {
     HomePage,
+    SupplierPage
   },
   watch: {
     openKeys(val) {
@@ -60,6 +59,7 @@ export default {
   },
   methods: {
     handleClick(e) {
+      this.current = e.key
       console.log("click", e);
     },
     titleClick(e) {
