@@ -34,6 +34,7 @@
       :modalTitle.sync="modalTitle"
       :modalVisible.sync="modalVisible"
       :supplierObj="curOperation"
+      @refreshList="getSupplierList()"
     ></Form>
   </div>
 </template>
@@ -113,43 +114,39 @@ export default {
     Form,
   },
   mounted() {
-    this.getSupplierList().then((data) => {
-      let res = data.data;
-      if (res.code != 200) {
-      } else {
-        let arr = [];
-        res.data.forEach((element) => {
-          let obj = {
-            key: element.gid,
-            mainBusiness: element.mainBusiness,
-            name: element.name,
-            wxName: element.wxName,
-            wxNumber: element.wxNumber,
-          };
-          arr.push(obj);
-        });
-        this.supplierList = arr;
-      }
-    });
+    this.getSupplierList();
   },
   methods: {
-    getSupplierList() {
-      return new Promise(async (resolve, reject) => {
-        const res = await this.$http.get("/supplier/getSuppliersList");
-        if (res) {
-          resolve(res);
-        }
-      });
+    async getSupplierList() {
+      const res = await this.$http
+        .get("/supplier/getSuppliersList")
+        .then((data) => {
+          let res = data.data;
+          if (res.code != 200) {
+
+          } 
+          else {
+            let arr = [];
+            res.data.forEach((element) => {
+              let obj = {
+                key: element.gid,
+                mainBusiness: element.mainBusiness,
+                name: element.name,
+                wxName: element.wxName,
+                wxNumber: element.wxNumber,
+              };
+              arr.push(obj);
+            });
+            this.supplierList = arr;
+          }
+        });
     },
     async onDelete(key) {
-      // let params = {
-      //   gidList:[key]
-      // };
       let gid = key;
-      let res = await this.$http.post("/supplier/deleteSuppliers", {gid});
-      then(function(res){
-        console.log(res)
-      })
+      let res = await this.$http.post("/supplier/deleteSuppliers", { gid });
+      then(function (res) {
+        console.log(res);
+      });
     },
     onSelectChange(selectedRowKeys) {
       console.log("selectedRowKeys changed: ", selectedRowKeys);

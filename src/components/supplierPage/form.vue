@@ -72,6 +72,7 @@ export default {
         this.fillInInfo();
       }else {
           this.resetForm()
+          this.$emit("refreshList")
       }
     },
   },
