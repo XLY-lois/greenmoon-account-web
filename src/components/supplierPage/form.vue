@@ -11,20 +11,22 @@
         :model="form"
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
+        :rules="rules"
+        ref="supplierForm"
       >
         <a-form-model-item label="ID">
-          <a-input v-model="form.gid" />
+          <a-input v-model="form.gid" disabled />
         </a-form-model-item>
-        <a-form-model-item label="供应商名称">
+        <a-form-model-item label="供应商名称" prop="name">
           <a-input v-model="form.name" />
         </a-form-model-item>
-        <a-form-model-item label="微信名">
+        <a-form-model-item label="微信名" prop="wxName">
           <a-input v-model="form.wxName" />
         </a-form-model-item>
-        <a-form-model-item label="微信号">
+        <a-form-model-item label="微信号" prop="wxNumber">
           <a-input v-model="form.wxNumber" />
         </a-form-model-item>
-        <a-form-model-item label="主营业务">
+        <a-form-model-item label="主营业务" prop="mainBusiness">
           <a-input v-model="form.mainBusiness" type="textarea" />
         </a-form-model-item>
       </a-form-model>
@@ -33,6 +35,11 @@
 </template>
 
 <script>
+const requiredRule = {
+  required: true,
+  message: "此项必填，请输入值。",
+  trigger: "blur",
+};
 export default {
   data() {
     return {
@@ -46,6 +53,12 @@ export default {
         wxNumber: "",
         mainBusiness: "",
       },
+      rules: {
+        name: requiredRule,
+        wxName: requiredRule,
+        wxNumber: requiredRule,
+        mainBusiness: requiredRule,
+      },
     };
   },
   props: {
@@ -57,19 +70,15 @@ export default {
     modalVisible(newVal, oldVal) {
       if (newVal) {
         this.fillInInfo();
+      }else {
+          this.resetForm()
       }
     },
   },
   mounted() {},
   methods: {
     handleOk(e) {
-        console.log("Clicked OK button");
-      //   this.ModalText = "The modal will be closed after two seconds";
-    //   this.confirmLoading = true;
-      //   setTimeout(() => {
-      //     this.$emit("update:modalVisible", false);
-      //     this.confirmLoading = false;
-      //   }, 2000);
+      console.log("Clicked OK button");
       this.onSubmit().then((res) => {
         console.log(res);
         if (res) {
@@ -91,6 +100,16 @@ export default {
             resolve(res);
           }
         });
+      } else if (this.modalTitle == "修改供应商信息") {
+        return new Promise(async (resolve, reject) => {
+          const res = await this.$http.post(
+            "/supplier/updateSupplierInfo",
+            params
+          );
+          if (res) {
+            resolve(res);
+          }
+        });
       }
     },
     fillInInfo() {
@@ -103,6 +122,9 @@ export default {
         wxNumber: obj.wxNumber,
         mainBusiness: obj.mainBusiness,
       };
+    },
+    resetForm() {
+      this.$refs.supplierForm.resetFields();
     },
   },
 };

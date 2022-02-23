@@ -1,7 +1,9 @@
 <template>
   <div class="supplier-page">
     <div class="operations-box">
-      <a-button class="btn" type="primary" @click="showModal()"> 新增 </a-button>
+      <a-button class="btn" type="primary" @click="showModal()">
+        新增
+      </a-button>
       <a-button class="btn">批量删除</a-button>
     </div>
     <div class="table-box">
@@ -22,25 +24,22 @@
           >
             <a href="javascript:;">删除</a>
           </a-popconfirm>
-          <a 
-            href="javascript:;" 
-            class="edit-btn" 
-            @click="showModal(record)"
+          <a href="javascript:;" class="edit-btn" @click="showModal(record)"
             >编辑</a
           >
         </template>
       </a-table>
     </div>
-    <Form 
-      :modalTitle.sync="modalTitle" 
+    <Form
+      :modalTitle.sync="modalTitle"
       :modalVisible.sync="modalVisible"
       :supplierObj="curOperation"
-      ></Form>
+    ></Form>
   </div>
 </template>
 
 <script>
-import Form from "./form.vue"
+import Form from "./form.vue";
 // 表头
 const columns = [
   {
@@ -106,57 +105,62 @@ export default {
       selectedRowKeys: [],
       // ModalText: "Content of the modal",
       modalVisible: false,
-      modalTitle:'',
-      curOperation:{}//当前操作对象
+      modalTitle: "",
+      curOperation: {}, //当前操作对象
     };
   },
-  components:{
-    Form
+  components: {
+    Form,
   },
-  mounted(){
-    this.getSupplierList().then(data => {
-      let res = data.data
-      if(res.code != 200){
-
-      }else{
-        let arr = []
-        res.data.forEach(element => {
+  mounted() {
+    this.getSupplierList().then((data) => {
+      let res = data.data;
+      if (res.code != 200) {
+      } else {
+        let arr = [];
+        res.data.forEach((element) => {
           let obj = {
-            key:element.gid,
-            mainBusiness:element.mainBusiness,
-            name:element.name,
-            wxName:element.wxName,
-            wxNumber:element.wxNumber
-          }
-          arr.push(obj)
-        });                                       
-        this.supplierList = arr
+            key: element.gid,
+            mainBusiness: element.mainBusiness,
+            name: element.name,
+            wxName: element.wxName,
+            wxNumber: element.wxNumber,
+          };
+          arr.push(obj);
+        });
+        this.supplierList = arr;
       }
-    })
+    });
   },
   methods: {
     getSupplierList() {
-      return new Promise(async(resolve, reject) => {
-        const res = await this.$http.get("/supplier/getSuppliersList")
-        if(res){
-          resolve(res)
+      return new Promise(async (resolve, reject) => {
+        const res = await this.$http.get("/supplier/getSuppliersList");
+        if (res) {
+          resolve(res);
         }
       });
     },
-    onDelete(key) {
-      const dataSource = [...this.supplierList];
-      this.supplierList = dataSource.filter((item) => item.key !== key);
+    async onDelete(key) {
+      // let params = {
+      //   gidList:[key]
+      // };
+      let gid = key;
+      let res = await this.$http.post("/supplier/deleteSuppliers", {gid});
+      then(function(res){
+        console.log(res)
+      })
     },
     onSelectChange(selectedRowKeys) {
       console.log("selectedRowKeys changed: ", selectedRowKeys);
       this.selectedRowKeys = selectedRowKeys;
     },
-    showModal(obj={}) {
-      this.curOperation = obj
-      if(obj.key){
-        this.modalTitle = "修改供应商信息"
-      }else{
-        this.modalTitle = "新增供应商信息"
+    showModal(obj = {}) {
+      this.curOperation = obj;
+      if (obj.key) {
+        this.modalTitle = "修改供应商信息";
+      } else {
+        this.modalTitle = "新增供应商信息";
       }
       this.modalVisible = true;
     },
