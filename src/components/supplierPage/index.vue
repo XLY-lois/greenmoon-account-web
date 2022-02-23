@@ -4,7 +4,7 @@
       <a-button class="btn" type="primary" @click="showModal()">
         新增
       </a-button>
-      <a-button class="btn">批量删除</a-button>
+      <a-button class="btn" @click="deleteSome()">批量删除</a-button>
     </div>
     <div class="table-box">
       <a-table
@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import { Message } from "element-ui";
 import Form from "./form.vue";
 // 表头
 const columns = [
@@ -123,9 +124,7 @@ export default {
         .then((data) => {
           let res = data.data;
           if (res.code != 200) {
-
-          } 
-          else {
+          } else {
             let arr = [];
             res.data.forEach((element) => {
               let obj = {
@@ -141,12 +140,45 @@ export default {
           }
         });
     },
+    async deleteSome(){
+      let gids = this.selectedRowKeys
+      let res = await this.$http
+        .post("/supplier/deleteSuppliers", { gids })
+        .then(function (res) {
+          let code = res.data.code;
+          if (code == 200) {
+            Message({
+              message: "删除成功",
+              type: "success",
+            });
+          } else {
+            Message({
+              message: `删除失败，错误代码:${code}`,
+              type: "error",
+            });
+          }
+        });
+      this.getSupplierList();
+    },
     async onDelete(key) {
-      let gid = key;
-      let res = await this.$http.post("/supplier/deleteSuppliers", { gid });
-      then(function (res) {
-        console.log(res);
-      });
+      let gids = [key];
+      let res = await this.$http
+        .post("/supplier/deleteSuppliers", { gids })
+        .then(function (res) {
+          let code = res.data.code;
+          if (code == 200) {
+            Message({
+              message: "删除成功",
+              type: "success",
+            });
+          } else {
+            Message({
+              message: `删除失败，错误代码:${code}`,
+              type: "error",
+            });
+          }
+        });
+      this.getSupplierList();
     },
     onSelectChange(selectedRowKeys) {
       console.log("selectedRowKeys changed: ", selectedRowKeys);

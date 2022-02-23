@@ -32,6 +32,7 @@
       </div>
       <div class="content">
         <HomePage v-if="current == '1'"></HomePage>
+        <AccountPage v-if="current.indexOf('2') == 0"></AccountPage>
         <SupplierPage v-if="current == '3'"></SupplierPage>
       </div>
     </div>
@@ -42,6 +43,7 @@
 // @ is an alias to /src
 import HomePage from "../components/homePage";
 import SupplierPage from "../components/supplierPage";
+import AccountPage from "../components/accountPage"
 
 export default {
   name: "homePage",
@@ -53,6 +55,7 @@ export default {
   },
   components: {
     HomePage,
+    AccountPage,
     SupplierPage,
   },
   watch: {
