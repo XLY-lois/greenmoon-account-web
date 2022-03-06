@@ -1,22 +1,25 @@
 <template>
   <div class="account-page">
     <div class="table-box">
-      <RecordAdd></RecordAdd>
+      <IncomeRecord v-if="curMenuKey == '2-1'" :curMenuKey="curMenuKey"></IncomeRecord>
+
     </div>
   </div>
 </template>
 
 <script>
-import RecordAdd from "./recordAdd.vue";
+import IncomeRecord from "./incomeRecord.vue";
 export default {
   name: "index",
   data() {
     return {};
   },
   components: {
-    RecordAdd,
+    IncomeRecord,
   },
-  props: {},
+  props: {
+    curMenuKey: String,
+  },
   methods: {},
 };
 </script>
@@ -32,7 +35,7 @@ export default {
   .table-box {
     width: 80%;
     background-color: #fff;
-    padding: 2vh 2vw;
+    // padding: 2vh 2vw;
     margin-top: 2vh;
   }
 }

@@ -1,62 +1,40 @@
 <template>
   <div class="add-form">
     <div class="operations-box">
-      <div>
-        <span class="operations-label" v-show="curMenuKey == '2-1'"
-          >单据日期：</span
+      <span class="operations-label">单据日期：</span>
+      <a-date-picker @change="onDateChange" v-model="momentObj" />
+      <span class="operations-label"> 往来方： </span>
+      <a-select
+        show-search
+        placeholder="请选择往来方"
+        option-filter-prop="children"
+        style="width: 6vw"
+        :filter-option="filterOption"
+        @change="onEntityChange"
+        allowClear
+      >
+        <a-select-option
+          v-for="item in suppliersList"
+          :key="item.id"
+          :value="item.id"
         >
-        <span class="operations-label" v-show="curMenuKey == '2-2'"
-          >开始日期：</span
+          {{ item.name }}
+        </a-select-option>
+      </a-select>
+      <span class="operations-label"> 资金账户： </span>
+      <a-select style="width: 6vw" @change="onAccountChange">
+        <a-select-option
+          v-for="item in capitalAccountList"
+          :key="item.id"
+          :value="item.id"
         >
-        <a-date-picker @change="onDateChange" v-model="momentObj" />
-        <span class="operations-label" v-show="curMenuKey == '2-2'"
-          >结束日期：</span
-        >
-        <a-date-picker
-          @change="onEndDateChange"
-          v-model="queryParams.endMomentObj"
-          v-show="curMenuKey == '2-2'"
-        />
-        <span class="operations-label" v-show="curMenuKey == '2-2'">
-          往来方：
-        </span>
-        <a-select
-          show-search
-          placeholder="请选择往来方"
-          option-filter-prop="children"
-          style="width: 10vw"
-          :filter-option="filterOption"
-          @change="onSupplierChange"
-          v-show="curMenuKey == '2-2'"
-          allowClear
-        >
-          <a-select-option
-            v-for="item in suppliersList"
-            :key="item.id"
-            :value="item.id"
-          >
-            {{ item.name }}
-          </a-select-option>
-        </a-select>
-        <span class="operations-label">方向：</span>
-        <a-radio-group
-          :options="options"
-          @change="onDirChange"
-          :value="curMenuKey == '2-1' ? defaultDir : queryParams.mDirection"
-        />
-        <a-button v-show="curMenuKey == '2-1'" class="btn" @click="handleAdd">
-          新增
-        </a-button>
-        <a-button v-show="curMenuKey == '2-2'" class="btn" @click="queryBill">
-          查询
-        </a-button>
+          {{ item.name }}
+        </a-select-option>
+      </a-select>
+      <div class="btn-box">
+        <a-button class="btn" @click="handleAdd"> 新增 </a-button>
         <a-button class="btn" @click="deleteRows()"> 批量删除 </a-button>
-        <a-button
-          type="primary"
-          v-show="curMenuKey == '2-1'"
-          class="btn"
-          @click="submitList()"
-        >
+        <a-button type="primary" class="btn" @click="submitList()">
           保存
         </a-button>
       </div>
@@ -75,8 +53,7 @@
         <template slot="relaEntity" slot-scope="text, record">
           <editable-cell
             :text="text"
-            :type="'select'"
-            :curMenuKey="curMenuKey"
+            :type="'selectEntity'"
             :suppliersList="suppliersList"
             @change="onCellChange(record.key, 'relaEntity', $event)"
           />
@@ -86,40 +63,32 @@
             :text="text"
             :type="'date'"
             :momentObj="momentObj || null"
-            :curMenuKey="curMenuKey"
             @change="onCellChange(record.key, 'sTime', $event)"
-          />
-        </template>
-        <template slot="mDirection" slot-scope="text, record">
-          <editable-cell
-            :text="text == 'in' ? '收入' : text == 'out' ? '支出' : ''"
-            :type="'option'"
-            :defaultDir="defaultDir"
-            :curMenuKey="curMenuKey"
-            @change="onCellChange(record.key, 'mDirection', $event)"
           />
         </template>
         <template slot="sumMoney" slot-scope="text, record">
           <editable-cell
             :text="text"
             :type="'number'"
-            :curMenuKey="curMenuKey"
             @change="onCellChange(record.key, 'sumMoney', $event)"
+          />
+        </template>
+        <template slot="capitalAccount" slot-scope="text, record">
+          <editable-cell
+            :text="text"
+            :type="'selectAccount'"
+            :capitalAccountList="capitalAccountList"
+            @change="onCellChange(record.key, 'relaEntity', $event)"
           />
         </template>
         <template slot="content" slot-scope="text, record">
           <editable-cell
             :text="text"
             :type="'text'"
-            :curMenuKey="curMenuKey"
             @change="onCellChange(record.key, 'content', $event)"
           />
         </template>
-        <template
-          slot="operation"
-          slot-scope="text, record"
-          v-if="curMenuKey == '2-1'"
-        >
+        <template slot="operation" slot-scope="text, record">
           <a-popconfirm
             v-if="dataSource.length"
             title="Sure to delete?"
@@ -130,9 +99,9 @@
         </template>
       </a-table>
     </div>
-    <div class="total-box" v-show="curMenuKey == '2-2'">
+    <!-- <div class="total-box">
       <span>合计：{{ total }}</span>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -141,20 +110,17 @@ const EditableCell = {
   template: `
       <div 
         style="width:100%;height:30px;" 
-        @click="edit()" 
       >
-        <div 
-          v-if="editable && curMenuKey == '2-1'" 
-           
-        > 
+        <div> 
         <a-select
-          v-if="type == 'select'"
+          v-if="type == 'selectEntity'"
           show-search
           placeholder="请选择往来方"
           option-filter-prop="children"
           style="width: 100%"
           :filter-option="filterOption"
-          @change="supplierChange"
+          @change="entityChange"
+          :value="value" 
         >
           <a-select-option 
             v-for="item in suppliersList" 
@@ -175,17 +141,21 @@ const EditableCell = {
             @change="onDateChange"
             :value="dateObj" 
           />
-          <a-radio-group 
-            v-if="type == 'option'"
-            :options="options" 
-\           :value="curOption"
-            @change="onRadioChange" 
-            @blur="check(curOption)"
-          />
-
-        </div>
-        <div v-else >
-          {{ value || ' ' }}
+           <a-select 
+                v-if="type == 'selectAccount'"
+                placeholder="请选择资金账户"
+                style="width: 100%"
+                @change="entityChange"
+                :value="value" 
+            >
+            <a-select-option
+            v-for="item in capitalAccountList"
+            :key="item.id"
+            :value="item.id"
+            >
+            {{ item.name }}
+            </a-select-option>
+        </a-select>
         </div>
       </div>
     `,
@@ -195,23 +165,17 @@ const EditableCell = {
     momentObj: Object, //默认日期
     defaultDir: String, //默认方向
     suppliersList: Array, //往来方列表
-    curMenuKey: String,
+    capitalAccountList: Array, //资金账户列表
   },
   data() {
     return {
       value: this.text,
-      editable: false,
       dateObj: this.momentObj,
-      curOption: this.defaultDir,
-      options: [
-        { label: "收入", value: "in" },
-        { label: "支出", value: "out" },
-      ],
     };
   },
   mounted() {},
   methods: {
-    supplierChange(value) {
+    entityChange(value) {
       console.log(`selected ${value}`);
       this.value = value;
       this.$emit("change", this.value);
@@ -234,16 +198,8 @@ const EditableCell = {
       }
     },
     check() {
-      this.editable = false;
       this.checkNum();
       this.$emit("change", this.value);
-    },
-    edit() {
-      this.editable = true;
-    },
-    onRadioChange(e) {
-      this.curOption = e.target.value;
-      this.$emit("change", this.curOption);
     },
     onDateChange(date, dateString) {
       this.value = dateString;
@@ -261,12 +217,12 @@ export default {
   data() {
     return {
       suppliersList: [],
+      capitalAccountList: [
+        { id: 1, name: "账户1" },
+        { id: 2, name: "账户2" },
+      ],
       suppliersEnum: {},
       dataSource: [],
-      options: [
-        { label: "收入", value: "in" },
-        { label: "支出", value: "out" },
-      ],
       count: 2,
       columns: [
         {
@@ -282,16 +238,16 @@ export default {
           scopedSlots: { customRender: "sTime" },
         },
         {
-          title: "资金流向",
-          dataIndex: "mDirection",
-          width: "15%",
-          scopedSlots: { customRender: "mDirection" },
-        },
-        {
           title: "金额",
           dataIndex: "sumMoney",
           width: "15%",
           scopedSlots: { customRender: "sumMoney" },
+        },
+        {
+          title: "资金账户",
+          dataIndex: "capitalAccount",
+          width: "15%",
+          scopedSlots: { customRender: "capitalAccount" },
         },
         {
           title: "用途",
@@ -306,13 +262,14 @@ export default {
           scopedSlots: { customRender: "operation" },
         },
       ],
-      selectDate: "",
-      momentObj: undefined, //日期默认值
+      selectDate: "", //日期默认string
+      momentObj: undefined, //日期默认obj
+      defaultEntity: "", //默认往来方
+      defaultAccount: "", //默认资金账户
       defaultDir: "", //资金流默认值
       selectedRowKeys: [],
       selectedRow: [],
       queryParams: {
-        endMomentObj: undefined,
         sTime: "",
         eTime: "",
         relaEntity: "",
@@ -331,7 +288,7 @@ export default {
     curMenuKey(newVal, oldVal) {
       this.dataSource = [];
       this.momentObj = undefined;
-      this.defaultDir = "";
+      this.defaultDir = "in";
       this.queryParams = {
         endMomentObj: undefined,
         sTime: "",
@@ -349,9 +306,15 @@ export default {
       this.selectedRowKeys = selectedRowKeys;
       this.selectedRow = selectedRows;
     },
-    onSupplierChange(value) {
+    onEntityChange(value) {
+      //默认往来方下拉框变化时
       console.log(`selected ${value}`);
-      this.queryParams.relaEntity = value;
+      this.defaultEntity = value;
+      //   this.queryParams.relaEntity = value;
+    },
+    onAccountChange(value) {
+      console.log(`selected ${value}`);
+      this.defaultAccount = value;
     },
     filterOption(input, option) {
       return (
@@ -400,33 +363,20 @@ export default {
       const { count, dataSource } = this;
       const newData = {
         key: count,
-        relaEntity: "",
+        relaEntity: this.defaultEntity,
         sTime: this.selectDate,
         sumMoney: "",
         mDirection: this.defaultDir,
         content: "",
+        capitalAccount: this.defaultAccount,
       };
       this.dataSource = [...dataSource, newData];
       this.count = count + 1;
     },
     onDateChange(date, dateString) {
-      if (this.curMenuKey == "2-1") {
-        this.selectDate = dateString;
-        this.momentObj = date;
-      } else if (this.curMenuKey == "2-2") {
-        this.queryParams.sTime = dateString;
-      }
-    },
-    onEndDateChange(date, dateString) {
-      this.queryParams.eTime = dateString;
-    },
-    onDirChange(e) {
-      let val = e.target.value;
-      if (this.curMenuKey == "2-1") {
-        this.defaultDir = val;
-      } else if (this.curMenuKey == "2-2") {
-        this.queryParams.mDirection = val;
-      }
+      //默认日期选择器变化时
+      this.selectDate = dateString;
+      this.momentObj = date;
     },
     deleteRows() {
       const dataSource = [...this.dataSource];
@@ -464,33 +414,6 @@ export default {
           }
         });
     },
-    async queryBill() {
-      this.dataSource = [];
-      this.total = 0;
-      const res = await this.$http
-        .post("/bill/getBillList", { ...this.queryParams })
-        .then((res) => {
-          console.log(res);
-          let list = res.data.data.data;
-          let sum = res.data.data.sum;
-          let code = res.data.code;
-          if (code == 200) {
-            list.forEach((element) => {
-              this.dataSource.push({
-                key: element.gid,
-                relaEntity: this.suppliersEnum[element.relaEntity],
-                sTime: element.sTimeStr,
-                sumMoney: element.sumMoney,
-                mDirection: element.mDirection,
-                content: element.content,
-              });
-            });
-            this.total = sum;
-          } else {
-            this.$message.error(`保存失败，错误代码：${res.data.code}`);
-          }
-        });
-    },
   },
 };
 </script>
@@ -506,8 +429,11 @@ export default {
     .operations-label {
       margin-left: 2vw;
     }
-    .btn {
-      margin-right: 2vw;
+    .btn-box {
+      margin-left: 2vw;
+      .btn {
+        margin-right: 2vw;
+      }
     }
   }
   .table-box {

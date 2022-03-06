@@ -12,12 +12,12 @@
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
         :rules="rules"
-        ref="supplierForm"
+        ref="infoForm"
       >
         <a-form-model-item label="ID">
           <a-input v-model="form.gid" disabled />
         </a-form-model-item>
-        <a-form-model-item label="供应商名称" prop="name">
+        <a-form-model-item label="名称" prop="name">
           <a-input v-model="form.name" />
         </a-form-model-item>
         <a-form-model-item label="微信名" prop="wxName">
@@ -26,7 +26,14 @@
         <a-form-model-item label="微信号" prop="wxNumber">
           <a-input v-model="form.wxNumber" />
         </a-form-model-item>
-        <a-form-model-item label="主营业务" prop="mainBusiness">
+        <a-form-model-item label="电话号码" prop="phone">
+          <a-input v-model="form.phone" />
+        </a-form-model-item>
+        <a-form-model-item
+          v-if="parent == 'supplierTable'"
+          label="主营业务"
+          prop="mainBusiness"
+        >
           <a-input v-model="form.mainBusiness" type="textarea" />
         </a-form-model-item>
       </a-form-model>
@@ -35,6 +42,11 @@
 </template>
 
 <script>
+import Service from "../utils/service";
+import { Message } from "element-ui";
+
+const service = Service();
+
 const requiredRule = {
   required: true,
   message: "此项必填，请输入值。",
@@ -52,27 +64,27 @@ export default {
         wxName: "",
         wxNumber: "",
         mainBusiness: "",
+        phone: "",
+        entityType: "",
       },
       rules: {
         name: requiredRule,
-        wxName: requiredRule,
-        wxNumber: requiredRule,
-        mainBusiness: requiredRule,
       },
     };
   },
   props: {
     modalTitle: String,
     modalVisible: Boolean,
-    supplierObj: Object,
+    curOperation: Object,
+    parent: String,
   },
   watch: {
     modalVisible(newVal, oldVal) {
       if (newVal) {
         this.fillInInfo();
-      }else {
-          this.resetForm()
-          this.$emit("refreshList")
+      } else {
+        this.resetForm();
+        // this.$emit("refreshList");
       }
     },
   },
@@ -80,13 +92,7 @@ export default {
   methods: {
     handleOk(e) {
       console.log("Clicked OK button");
-      this.onSubmit().then((res) => {
-        console.log(res);
-        if (res) {
-          this.$emit("update:modalVisible", false);
-          this.confirmLoading = false;
-        }
-      });
+      this.onSubmit();
     },
     handleCancel(e) {
       console.log("Clicked cancel button");
@@ -94,38 +100,44 @@ export default {
     },
     onSubmit() {
       let params = this.form;
-      if (this.modalTitle == "新增供应商信息") {
-        return new Promise(async (resolve, reject) => {
-          const res = await this.$http.post("/supplier/addSuppliers", params);
-          if (res) {
-            resolve(res);
+      if (
+        this.modalTitle == "新增供应商信息" ||
+        this.modalTitle == "新增员工信息"
+      ) {
+        service.doPost("/entity/addEntity", params).then((res) => {
+          if (res.getCode() == 200) {
+            Message({
+              message: `新增供应商信息成功！`,
+              type: "success",
+            });
           }
+          this.$emit("update:modalVisible", false);
+          this.$emit("refreshList");
         });
-      } else if (this.modalTitle == "修改供应商信息") {
-        return new Promise(async (resolve, reject) => {
-          const res = await this.$http.post(
-            "/supplier/updateSupplierInfo",
-            params
-          );
-          if (res) {
-            resolve(res);
+      } else if (
+        this.modalTitle == "修改供应商信息" ||
+        this.modalTitle == "修改员工信息"
+      ) {
+        service.doPost("/entity/updateEntity", params).then((res) => {
+          if (res.getCode() == 200) {
+            Message({
+              message: `${this.modalTitle}成功`,
+              type: "success",
+            });
+            this.$emit("update:modalVisible", false);
+            this.$emit("refreshList");
           }
         });
       }
     },
+
     fillInInfo() {
-      console.log(this.supplierObj);
-      let obj = this.supplierObj;
-      this.form = {
-        gid: obj.key,
-        name: obj.name,
-        wxName: obj.wxName,
-        wxNumber: obj.wxNumber,
-        mainBusiness: obj.mainBusiness,
-      };
+      this.form = this.curOperation;
+      console.log(this, this.form);
     },
+    // 重置表单数据
     resetForm() {
-      this.$refs.supplierForm.resetFields();
+      this.$refs.infoForm.resetFields();
     },
   },
 };

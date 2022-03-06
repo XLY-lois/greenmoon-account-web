@@ -4,7 +4,7 @@
       <a-button class="btn" type="primary" @click="showModal()">
         新增
       </a-button>
-      <a-button class="btn" @click="deleteSome()">批量删除</a-button>
+      <a-button class="btn" @click="onDelete(selectedRowKeys)">批量删除</a-button>
     </div>
     <div class="table-box">
       <a-table
@@ -20,7 +20,7 @@
           <a-popconfirm
             v-if="supplierList.length"
             title="确定要删除该供应商吗？"
-            @confirm="() => onDelete(record.key)"
+            @confirm="() => onDelete([record.gid])"
           >
             <a href="javascript:;">删除</a>
           </a-popconfirm>
@@ -33,7 +33,8 @@
     <Form
       :modalTitle.sync="modalTitle"
       :modalVisible.sync="modalVisible"
-      :supplierObj="curOperation"
+      :curOperation="curOperation"
+      :parent="'supplierTable'"
       @refreshList="getSupplierList()"
     ></Form>
   </div>
@@ -42,13 +43,11 @@
 <script>
 import { Message } from "element-ui";
 import Form from "./form.vue";
+import Service from "../utils/service";
+
+var service = Service();
 // 表头
 const columns = [
-  {
-    title: "ID",
-    dataIndex: "id",
-    key: "id",
-  },
   {
     title: "名称",
     dataIndex: "name",
@@ -66,6 +65,12 @@ const columns = [
     // width: 80,
   },
   {
+    title: "电话号码",
+    dataIndex: "phone",
+    key: "phone",
+    // ellipsis: true,
+  },
+  {
     title: "主营业务",
     dataIndex: "mainBusiness",
     key: "mainBusiness",
@@ -80,35 +85,16 @@ const columns = [
 export default {
   data() {
     return {
-      supplierList: [
-        // {
-        //   key: "1",
-        //   name: "John Brown",
-        //   wxName: "Newaaa",
-        //   wxNumber: "Newaaa",
-        //   mainBusiness: "蔬菜",
-        // },
-        // {
-        //   key: "2",
-        //   name: "Jim Green",
-        //   wxName: "dsdfsdsf",
-        //   wxNumber: "dsdfsdsf",
-        //   mainBusiness: "水果",
-        // },
-        // {
-        //   key: "3",
-        //   name: "Joe Black",
-        //   wxName: "sdffsdfd",
-        //   wxNumber: "sdffsdfd",
-        //   mainBusiness: "肉类",
-        // },
-      ],
+      supplierList: [],
       columns,
       selectedRowKeys: [],
-      // ModalText: "Content of the modal",
       modalVisible: false,
       modalTitle: "",
       curOperation: {}, //当前操作对象
+      // 实体类型：stuff 员工，supplier 供应商
+      entity: {
+        entityType: "supplier",
+      },
     };
   },
   components: {
@@ -118,75 +104,35 @@ export default {
     this.getSupplierList();
   },
   methods: {
-    async getSupplierList() {
-      const res = await this.$http
-        .get("/supplier/getSuppliersList")
-        .then((data) => {
-          let res = data.data;
-          if (res.code != 200) {
-          } else {
-            let arr = [];
-            res.data.forEach((element) => {
-              let obj = {
-                key: element.gid,
-                mainBusiness: element.mainBusiness,
-                name: element.name,
-                wxName: element.wxName,
-                wxNumber: element.wxNumber,
-              };
-              arr.push(obj);
-            });
-            this.supplierList = arr;
-          }
+    getSupplierList() {
+      this.supplierList = [];
+      const url = "/entity/selectByFilter";
+      service.doPost(url, this.entity).then((result) => {
+        let arr = result.getData();
+        arr.forEach((element) => {
+          this.supplierList.push({ ...element, key: element.gid });
         });
+      });
     },
-    async deleteSome(){
-      let gids = this.selectedRowKeys
-      let res = await this.$http
-        .post("/supplier/deleteSuppliers", { gids })
-        .then(function (res) {
-          let code = res.data.code;
-          if (code == 200) {
-            Message({
-              message: "删除成功",
-              type: "success",
-            });
-          } else {
-            Message({
-              message: `删除失败，错误代码:${code}`,
-              type: "error",
-            });
-          }
-        });
-      this.getSupplierList();
-    },
-    async onDelete(key) {
-      let gids = [key];
-      let res = await this.$http
-        .post("/supplier/deleteSuppliers", { gids })
-        .then(function (res) {
-          let code = res.data.code;
-          if (code == 200) {
-            Message({
-              message: "删除成功",
-              type: "success",
-            });
-          } else {
-            Message({
-              message: `删除失败，错误代码:${code}`,
-              type: "error",
-            });
-          }
-        });
-      this.getSupplierList();
+    onDelete(arr) {
+      let gids = arr
+      service.doPost("/entity/deleteByGid", { gids }).then((res) => {
+        if (res.getCode() == 200) {
+          Message({
+            message: `删除成功！`,
+            type: "success",
+          });
+          this.getSupplierList();
+        }
+      });
     },
     onSelectChange(selectedRowKeys) {
       console.log("selectedRowKeys changed: ", selectedRowKeys);
       this.selectedRowKeys = selectedRowKeys;
     },
-    showModal(obj = {}) {
-      this.curOperation = obj;
-      if (obj.key) {
+    showModal(obj = { entityType: "supplier" }) {
+      this.curOperation = { ...obj };
+      if (this.curOperation.key) {
         this.modalTitle = "修改供应商信息";
       } else {
         this.modalTitle = "新增供应商信息";
