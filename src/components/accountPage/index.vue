@@ -3,6 +3,7 @@
     <div class="table-box">
       <IncomeRecord v-if="curMenuKey == '2-1'" :curMenuKey="curMenuKey"></IncomeRecord>
       <PayRecord v-if="curMenuKey == '2-2'" :curMenuKey="curMenuKey"></PayRecord>
+      <SelectPage v-if="curMenuKey == '2-3'" :curMenuKey="curMenuKey"></SelectPage>
     </div>
   </div>
 </template>
@@ -10,6 +11,8 @@
 <script>
 import IncomeRecord from "./incomeRecord.vue";
 import PayRecord from "./payRecord.vue"
+import SelectPage from "./selectPage.vue"
+
 export default {
   name: "index",
   data() {
@@ -17,7 +20,8 @@ export default {
   },
   components: {
     IncomeRecord,
-    PayRecord
+    PayRecord,
+    SelectPage
   },
   props: {
     curMenuKey: String,
