@@ -1,6 +1,6 @@
 <template>
   <div class="add-form">
-    <div class="form-title">收入新增</div>
+    <div class="form-title">支出新增</div>
     <div class="operations-box">
       <span class="operations-label">单据日期：</span>
       <a-date-picker @change="onDateChange" v-model="momentObj" />
@@ -178,7 +178,7 @@ const EditableCell = {
   mounted() {},
   methods: {
     entityChange(value) {
-      // console.log(`selected ${value}`);
+    //   console.log(`selected ${value}`);
       this.value = value;
       this.$emit("change", this.value);
     },
@@ -192,7 +192,7 @@ const EditableCell = {
     onInputChange(e) {
       const value = e.target.value;
       this.value = value;
-      // console.log(value);
+    //   console.log(value);
     },
     checkNum() {
       if (this.type == "number" && isNaN(this.value)) {
@@ -268,7 +268,7 @@ export default {
       momentObj: undefined, //日期默认obj
       defaultEntity: "", //默认往来方
       defaultAccount: "", //默认资金账户
-      defaultDir: "in", //资金流默认值
+      defaultDir: "out", //资金流默认值
       selectedRowKeys: [],
       selectedRow: [],
       total: 0, //本次查询合计金额
@@ -284,7 +284,7 @@ export default {
     curMenuKey(newVal, oldVal) {
       this.dataSource = [];
       this.momentObj = undefined;
-      this.defaultDir = "in";
+      this.defaultDir = "out";
     },
   },
   methods: {
@@ -294,11 +294,11 @@ export default {
     },
     onEntityChange(value) {
       //默认往来方下拉框变化时
-      // console.log(`selected ${value}`);
+    //   console.log(`selected ${value}`);
       this.defaultEntity = value;
     },
     onAccountChange(value) {
-      // console.log(`selected ${value}`);
+    //   console.log(`selected ${value}`);
       this.defaultAccount = value;
     },
     filterOption(input, option) {
@@ -339,7 +339,6 @@ export default {
         target[dataIndex] = value;
         this.dataSource = dataSource;
       }
-      // console.log(this.dataSource);
     },
     onDelete(key) {
       const dataSource = [...this.dataSource];

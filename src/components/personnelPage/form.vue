@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import Service from "../utils/service";
+import Service from "../../utils/service";
 import { Message } from "element-ui";
 
 const service = Service();

@@ -43,7 +43,7 @@
 <script>
 import { Message } from "element-ui";
 import Form from "./form.vue";
-import Service from "../utils/service";
+import Service from "../../utils/service";
 
 var service = Service();
 

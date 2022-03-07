@@ -24,7 +24,7 @@ export default {
 <style lang="less" scoped>
 .home-page{
   width: 100%;
-  height: 92vh;
+  height: 94vh;
   background: #eee;
 }
 </style>
