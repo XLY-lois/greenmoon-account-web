@@ -5,23 +5,13 @@
       <span class="operations-label">单据日期：</span>
       <a-date-picker @change="onDateChange" v-model="momentObj" />
       <span class="operations-label"> 往来方： </span>
-      <a-select
-        show-search
+      <a-cascader
+        :options="entityList"
+        :show-search="{ filterEntity }"
         placeholder="请选择往来方"
-        option-filter-prop="children"
-        style="width: 6vw"
-        :filter-option="filterOption"
         @change="onEntityChange"
-        allowClear
-      >
-        <a-select-option
-          v-for="item in suppliersList"
-          :key="item.id"
-          :value="item.id"
-        >
-          {{ item.name }}
-        </a-select-option>
-      </a-select>
+        style="width: 6vw"
+      />
       <span class="operations-label"> 资金账户： </span>
       <a-select style="width: 6vw" @change="onAccountChange">
         <a-select-option
@@ -55,7 +45,8 @@
           <editable-cell
             :text="text"
             :type="'selectEntity'"
-            :suppliersList="suppliersList"
+            :entityList="entityList"
+            :defaultEntity="defaultEntity"
             @change="onCellChange(record.key, 'relaEntity', $event)"
           />
         </template>
@@ -79,7 +70,7 @@
             :text="text"
             :type="'selectAccount'"
             :capitalAccountList="capitalAccountList"
-            @change="onCellChange(record.key, 'relaEntity', $event)"
+            @change="onCellChange(record.key, 'capitalAccount', $event)"
           />
         </template>
         <template slot="content" slot-scope="text, record">
@@ -100,9 +91,6 @@
         </template>
       </a-table>
     </div>
-    <!-- <div class="total-box">
-      <span>合计：{{ total }}</span>
-    </div> -->
   </div>
 </template>
 
@@ -113,24 +101,15 @@ const EditableCell = {
         style="width:100%;height:30px;" 
       >
         <div> 
-        <a-select
-          v-if="type == 'selectEntity'"
-          show-search
+        <a-cascader
+          v-if="type == 'selectEntity' "
+          :options="entityList"
+          :show-search="{ filterEntity }"
           placeholder="请选择往来方"
-          option-filter-prop="children"
-          style="width: 100%;"
-          :filter-option="filterOption"
-          @change="entityChange"
-          :value="value" 
-        >
-          <a-select-option 
-            v-for="item in suppliersList" 
-            :key="item.id"
-            :value="item.id"
-          >
-            {{ item.name }}
-          </a-select-option>
-        </a-select>
+          @change="onEntityChange"
+          style="width: 6vw"
+          :value="entityArr"
+        />
           <a-input 
             v-if="type == 'text' || type == 'number'"
             :value="value" 
@@ -166,17 +145,30 @@ const EditableCell = {
     type: String,
     momentObj: Object, //默认日期
     defaultDir: String, //默认方向
-    suppliersList: Array, //往来方列表
+    defaultEntity: Array, //默认往来方路径
+    entityList: Array, //往来方列表
     capitalAccountList: Array, //资金账户列表
   },
   data() {
     return {
       value: this.text,
       dateObj: this.momentObj,
+      entityArr: this.defaultEntity,
     };
   },
   mounted() {},
   methods: {
+    onEntityChange(value, selectedOptions) {
+      //默认往来方下拉框变化时
+      this.value = value;
+      this.$emit("change", this.value);
+    },
+    filterEntity(inputValue, path) {
+      return path.some(
+        (option) =>
+          option.label.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
+      );
+    },
     entityChange(value) {
       // console.log(`selected ${value}`);
       this.value = value;
@@ -210,7 +202,9 @@ const EditableCell = {
     },
   },
 };
+import Service from "../../utils/service";
 
+var service = Service();
 export default {
   name: "addRecord",
   components: {
@@ -266,19 +260,20 @@ export default {
       ],
       selectDate: "", //日期默认string
       momentObj: undefined, //日期默认obj
-      defaultEntity: "", //默认往来方
+      defaultEntity: [], //默认往来方路径
       defaultAccount: "", //默认资金账户
       defaultDir: "in", //资金流默认值
       selectedRowKeys: [],
       selectedRow: [],
       total: 0, //本次查询合计金额
+      entityList: [], //往来方级联
     };
   },
   props: {
     curMenuKey: String,
   },
   mounted() {
-    this.getSupplierComboxList();
+    this.getEntityComboxList();
   },
   watch: {
     curMenuKey(newVal, oldVal) {
@@ -288,13 +283,19 @@ export default {
     },
   },
   methods: {
+    filterEntity(inputValue, path) {
+      return path.some(
+        (option) =>
+          option.label.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
+      );
+    },
     onSelectChange(selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys;
       this.selectedRow = selectedRows;
     },
-    onEntityChange(value) {
+    onEntityChange(value, selectedOptions) {
       //默认往来方下拉框变化时
-      // console.log(`selected ${value}`);
+      console.log(value, selectedOptions);
       this.defaultEntity = value;
     },
     onAccountChange(value) {
@@ -308,18 +309,19 @@ export default {
           .indexOf(input.toLowerCase()) >= 0
       );
     },
-    async getSupplierComboxList() {
-      const res = await this.$http
-        .get("/supplier/getSupplierComboxList")
-        .then((res) => {
-          this.suppliersList = res.data.data;
-          this.suppliersList.forEach((element) => {
-            this.suppliersEnum[element.id] = element.name;
-          });
-        });
+    getEntityComboxList() {
+      service.doGet("/entity/getEntityComboxList").then((result) => {
+        let arr = result.getData();
+        this.entityList = arr;
+      });
     },
     async submitList() {
       let billList = this.dataSource;
+      billList.forEach((element) => {
+        //处理往来方路径
+        let len = element.relaEntity.length;
+        element.relaEntity = element.relaEntity[len - 1];
+      });
       console.log(billList);
       // const res = await this.$http
       //   .post("/bill/addBill", { billList })
@@ -339,7 +341,7 @@ export default {
         target[dataIndex] = value;
         this.dataSource = dataSource;
       }
-      // console.log(this.dataSource);
+      console.log(this.dataSource);
     },
     onDelete(key) {
       const dataSource = [...this.dataSource];
