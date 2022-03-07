@@ -25,11 +25,11 @@ class service {
     }
     // 执行get请求
     doGet(url: any, params: any) {
-        let result: any = {};
-        axios.get(url).then(resp => {
-            return new Result(resp);
+        return new Promise((resolve, reject) => {
+            axios.get(url).then(resp => {
+                resolve(new Result(resp));
+            })
         })
-        return result;
     }
 }
 
