@@ -5,25 +5,29 @@
         <span>往来方：</span>
         <a-cascader
           :options="options"
-          placeholder="请选择供应商"
+          placeholder="往来方"
           @change="setEntity"
         />
       </div>
       <div>
         <span>资金账户：</span>
-        <a-select style="width: 6vw" @change="onAccountChange">
+        <a-select style="width: 6vw" @change="setCapitalAccount">
           <a-select-option
             v-for="item in capitalAccountList"
             :key="item.value"
-            :value="item.label"
+            :value="item.value"
           >
-            {{ item.name }}
+            {{ item.label }}
           </a-select-option>
         </a-select>
       </div>
       <div>
         <span>日期范围：</span>
-        <a-range-picker @change="setTime" />
+        <a-range-picker style="width: 12vw" @change="setTime" />
+      </div>
+      <div>
+        <a-button type="primary" @click="selectByFilter"> 查询 </a-button>
+        <a-button type="primary" style="margin-left:10px" @click="reset"> 重置 </a-button>
       </div>
     </div>
     <a-table
@@ -58,7 +62,7 @@ const columns = [
   },
   {
     title: "关系实体",
-    dataIndex: "releEntity",
+    dataIndex: "relaEntity",
   },
   {
     title: "金额",
@@ -78,6 +82,10 @@ const columns = [
   {
     title: "资金账户",
     dataIndex: "capitalAccount",
+  },
+  {
+    title: "内容",
+    dataIndex: "content",
   },
   {
     title: "时间",
@@ -108,6 +116,7 @@ export default {
       },
       bill: {
         gid: "",
+        capitalAccount: "",
         sTime: "",
         eTime: "",
       },
@@ -116,13 +125,22 @@ export default {
     };
   },
   mounted() {
-    this.getBillList();
-    this.getEntityComboxList();
-    this.getCapitalAccountList();
+    this.init();
   },
   methods: {
+    init() {
+      this.getBillList();
+      this.getEntityComboxList();
+      this.getCapitalAccountList();
+    },
+    reset(){
+        this.bill = null;
+    },
     showEditModal(obj) {
       this.curOperationObj = obj;
+    },
+    setCapitalAccount(value) {
+      this.bill.capitalAccount = value;
     },
     setTime(dates, dateStrings) {
       this.bill.sTime = dateStrings[0];
@@ -142,6 +160,13 @@ export default {
         this.pagination.total = result.getData().length;
       });
     },
+    selectByFilter() {
+      const url = "/bill/getBillList";
+      service.doPost(url, this.bill).then((result) => {
+        this.billList = result.getData();
+        this.pagination.total = result.getData().length;
+      });
+    },
     getEntityComboxList() {
       const url = "/entity/getEntityComboxList";
       service.doPost(url, {}).then((result) => {
@@ -151,7 +176,7 @@ export default {
     getCapitalAccountList() {
       const url = "/account/getAccountComboxList";
       service.doGet(url).then((result) => {
-        this.optiocapitalAccountListns = result.getData();
+        this.capitalAccountList = result.getData();
       });
     },
   },

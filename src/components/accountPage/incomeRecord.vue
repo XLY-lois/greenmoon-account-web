@@ -16,10 +16,10 @@
       <a-select style="width: 6vw" @change="onAccountChange">
         <a-select-option
           v-for="item in capitalAccountList"
-          :key="item.id"
-          :value="item.id"
+          :key="item.value"
+          :value="item.value"
         >
-          {{ item.name }}
+          {{ item.label }}
         </a-select-option>
       </a-select>
       <div class="btn-box">
@@ -131,10 +131,10 @@ const EditableCell = {
             >
             <a-select-option
             v-for="item in capitalAccountList"
-            :key="item.id"
-            :value="item.id"
+            :key="item.value"
+            :value="item.value"
             >
-            {{ item.name }}
+            {{ item.label }}
             </a-select-option>
         </a-select>
         </div>
@@ -156,8 +156,10 @@ const EditableCell = {
       entityArr: this.defaultEntity,
     };
   },
-  mounted() {},
+  mounted() {
+  },
   methods: {
+    
     onEntityChange(value, selectedOptions) {
       //默认往来方下拉框变化时
       this.value = value;
@@ -213,10 +215,7 @@ export default {
   data() {
     return {
       suppliersList: [],
-      capitalAccountList: [
-        { id: 1, name: "账户1" },
-        { id: 2, name: "账户2" },
-      ],
+      capitalAccountList: [],
       suppliersEnum: {},
       dataSource: [],
       count: 2,
@@ -274,6 +273,8 @@ export default {
   },
   mounted() {
     this.getEntityComboxList();
+    this.getCapitalAccountList();
+
   },
   watch: {
     curMenuKey(newVal, oldVal) {
@@ -283,6 +284,12 @@ export default {
     },
   },
   methods: {
+    getCapitalAccountList() {
+      const url = "/account/getAccountComboxList";
+      service.doGet(url).then((result) => {
+        this.capitalAccountList = result.getData();
+      });
+    },
     filterEntity(inputValue, path) {
       return path.some(
         (option) =>
@@ -323,16 +330,16 @@ export default {
         element.relaEntity = element.relaEntity[len - 1];
       });
       console.log(billList);
-      // const res = await this.$http
-      //   .post("/bill/addBill", { billList })
-      //   .then((res) => {
-      //     if (res.data.code == 200) {
-      //       this.$message.success("保存成功！");
-      //       this.dataSource = [];
-      //     } else {
-      //       this.$message.error(`保存失败，错误代码：${res.data.code}`);
-      //     }
-      //   });
+      const res = await this.$http
+        .post("/bill/addBill", { billList })
+        .then((res) => {
+          if (res.data.code == 200) {
+            this.$message.success("保存成功！");
+            this.dataSource = [];
+          } else {
+            this.$message.error(`保存失败，错误代码：${res.data.code}`);
+          }
+        });
     },
     onCellChange(key, dataIndex, value) {
       const dataSource = [...this.dataSource];

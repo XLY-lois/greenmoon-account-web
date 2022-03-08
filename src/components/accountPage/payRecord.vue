@@ -16,10 +16,10 @@
       <a-select style="width: 6vw" @change="onAccountChange">
         <a-select-option
           v-for="item in capitalAccountList"
-          :key="item.id"
-          :value="item.id"
+          :key="item.value"
+          :value="item.value"
         >
-          {{ item.name }}
+          {{ item.label }}
         </a-select-option>
       </a-select>
       <div class="btn-box">
@@ -131,10 +131,10 @@ const EditableCell = {
             >
             <a-select-option
             v-for="item in capitalAccountList"
-            :key="item.id"
-            :value="item.id"
+            :key="item.value"
+            :value="item.value"
             >
-            {{ item.name }}
+            {{ item.label }}
             </a-select-option>
         </a-select>
         </div>
@@ -156,8 +156,11 @@ const EditableCell = {
       entityArr: this.defaultEntity,
     };
   },
-  mounted() {},
+  mounted() {
+    this.getCapitalAccountList();
+  },
   methods: {
+    
     onEntityChange(value, selectedOptions) {
       //默认往来方下拉框变化时
       this.value = value;
@@ -275,6 +278,7 @@ export default {
   },
   mounted() {
     this.getEntityComboxList();
+    this.getCapitalAccountList();
   },
   watch: {
     curMenuKey(newVal, oldVal) {
@@ -284,6 +288,12 @@ export default {
     },
   },
   methods: {
+    getCapitalAccountList() {
+      const url = "/account/getAccountComboxList";
+      service.doGet(url).then((result) => {
+        this.capitalAccountList = result.getData();
+      });
+    },
     filterEntity(inputValue, path) {
       return path.some(
         (option) =>
