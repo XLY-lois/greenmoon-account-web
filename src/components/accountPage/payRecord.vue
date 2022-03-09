@@ -146,7 +146,7 @@ const EditableCell = {
     momentObj: Object, //默认日期
     defaultDir: String, //默认方向
     defaultEntity: Array, //默认往来方路径
-    suppliersList: Array, //往来方列表
+    entityList: Array, //往来方列表
     capitalAccountList: Array, //资金账户列表
   },
   data() {
@@ -156,15 +156,12 @@ const EditableCell = {
       entityArr: this.defaultEntity,
     };
   },
-  mounted() {
-    this.getCapitalAccountList();
-  },
+  mounted() {},
   methods: {
-    
     onEntityChange(value, selectedOptions) {
       //默认往来方下拉框变化时
-      this.value = value;
-      this.$emit("change", this.value);
+      this.entityArr = value;
+      this.$emit("change", this.entityArr);
     },
     filterEntity(inputValue, path) {
       return path.some(
@@ -321,12 +318,10 @@ export default {
       );
     },
     getEntityComboxList() {
-      service
-        .doGet("/entity/getEntityComboxList")
-        .then((result) => {
-          let arr = result.getData();
-          this.entityList = arr
-        });
+      service.doGet("/entity/getEntityComboxList").then((result) => {
+        let arr = result.getData();
+        this.entityList = arr;
+      });
     },
     async submitList() {
       let billList = this.dataSource;
@@ -336,16 +331,16 @@ export default {
         element.relaEntity = element.relaEntity[len - 1];
       });
       console.log(billList);
-      // const res = await this.$http
-      //   .post("/bill/addBill", { billList })
-      //   .then((res) => {
-      //     if (res.data.code == 200) {
-      //       this.$message.success("保存成功！");
-      //       this.dataSource = [];
-      //     } else {
-      //       this.$message.error(`保存失败，错误代码：${res.data.code}`);
-      //     }
-      //   });
+      const res = await this.$http
+        .post("/bill/addBill", { billList })
+        .then((res) => {
+          if (res.data.code == 200) {
+            this.$message.success("保存成功！");
+            this.dataSource = [];
+          } else {
+            this.$message.error(`保存失败，错误代码：${res.data.code}`);
+          }
+        });
     },
     onCellChange(key, dataIndex, value) {
       const dataSource = [...this.dataSource];

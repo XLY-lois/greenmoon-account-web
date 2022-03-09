@@ -162,8 +162,9 @@ const EditableCell = {
     
     onEntityChange(value, selectedOptions) {
       //默认往来方下拉框变化时
-      this.value = value;
-      this.$emit("change", this.value);
+      console.log(value)
+      this.entityArr = value;
+      this.$emit("change", this.entityArr);
     },
     filterEntity(inputValue, path) {
       return path.some(
