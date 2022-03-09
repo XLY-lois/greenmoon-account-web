@@ -20,7 +20,7 @@ class Result{
         this.code = resp.data.code;
         this.message = resp.data.message;
         this.data = resp.data.data;
-        this.sum = resp.data.sum? null:resp.data.sum;
+        this.sum = resp.data.sum? resp.data.sum:null;
     }
 }
 export default Result;

@@ -33,6 +33,13 @@
               <a-menu-item key="3-1">供应商</a-menu-item>
               <a-menu-item key="3-2">员工</a-menu-item>
             </a-sub-menu>
+            <a-sub-menu key="4" @titleClick="titleClick">
+              <span slot="title">
+                <a-icon type="idcard" /><span>仓库</span>
+              </span>
+              <a-menu-item key="4-1">每月库存盘点</a-menu-item>
+              <!-- <a-menu-item key="3-2">员工</a-menu-item> -->
+            </a-sub-menu>
           </a-menu>
         </div>
         <div class="content">
