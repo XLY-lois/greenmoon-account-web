@@ -50,12 +50,12 @@
             @change="onCellChange(record.key, 'relaEntity', $event)"
           />
         </template>
-        <template slot="sTime" slot-scope="text, record">
+        <template slot="createdTime" slot-scope="text, record">
           <editable-cell
             :text="text"
             :type="'date'"
             :momentObj="momentObj || null"
-            @change="onCellChange(record.key, 'sTime', $event)"
+            @change="onCellChange(record.key, 'createdTime', $event)"
           />
         </template>
         <template slot="sumMoney" slot-scope="text, record">
@@ -229,9 +229,9 @@ export default {
         },
         {
           title: "单据日期",
-          dataIndex: "sTime",
+          dataIndex: "createdTime",
           width: "15%",
-          scopedSlots: { customRender: "sTime" },
+          scopedSlots: { customRender: "createdTime" },
         },
         {
           title: "金额",
@@ -360,7 +360,7 @@ export default {
       const newData = {
         key: count,
         relaEntity: this.defaultEntity,
-        sTime: this.selectDate,
+        createdTime: this.selectDate,
         sumMoney: "",
         mDirection: this.defaultDir,
         content: "",

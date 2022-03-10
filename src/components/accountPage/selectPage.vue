@@ -1,39 +1,31 @@
 <template>
   <div class="query-page">
-    <div class="searchBox">
-      <div>
-        <span>往来方：</span>
-        <a-cascader
-          :options="options"
-          placeholder="往来方"
-          @change="setEntity"
-        />
-      </div>
-      <div>
-        <span>资金账户：</span>
-        <a-select
-          style="width: 8vw"
-          @change="setCapitalAccount"
-          :allowClear="true"
+    <div class="form-title">查询单据</div>
+    <div class="operations-box">
+      <span class="operations-label">往来方：</span>
+      <a-cascader :options="options" placeholder="往来方" @change="setEntity" />
+      <span class="operations-label">资金账户：</span>
+      <a-select
+        style="width: 8vw"
+        @change="setCapitalAccount"
+        :allowClear="true"
+      >
+        <a-select-option
+          v-for="item in capitalAccountList"
+          :key="item.value"
+          :value="item.value"
         >
-          <a-select-option
-            v-for="item in capitalAccountList"
-            :key="item.value"
-            :value="item.value"
-          >
-            {{ item.label }}
-          </a-select-option>
-        </a-select>
-      </div>
-      <div>
-        <span>日期范围：</span>
-        <a-range-picker style="width: 12vw" @change="setTime" />
-      </div>
-      <div>
-        <a-button type="primary" @click="selectByFilter"> 查询 </a-button>
-        <a-button type="primary" style="margin-left: 10px" @click="reset">
-          重置
+          {{ item.label }}
+        </a-select-option>
+      </a-select>
+
+      <span class="operations-label">日期范围：</span>
+      <a-range-picker style="width: 12vw" @change="setTime" />
+      <div class="btn-box">
+        <a-button type="primary" class="btn" @click="selectByFilter">
+          查询
         </a-button>
+        <a-button type="primary" class="btn" @click="reset"> 重置 </a-button>
       </div>
     </div>
     <div class="my-table">
@@ -56,18 +48,13 @@
             <a href="javascript:;">删除</a>
           </a-popconfirm>
         </template>
-        <template slot="footer">
-          <div>总计：{{ sum }}</div>
-          <!-- <a-pagination
-            :total="pagination.total"
-            :show-total="(total) => `共有 ${total} 条数据`"
-            :page-size="pagination.pageSize"
-            :default-current="1"
-            :pageSizeOptions="pagination.pageSizeOptions"
-            :show-size-changer="true"
-          /> -->
+        <template slot="mDirection" slot-scope="text">
+          {{ text === "in" ? "收入" : "支出" }}
         </template>
       </a-table>
+      <div class="total-box">
+        <span>合计：{{ sum }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -99,7 +86,10 @@ const columns = [
       { text: "收入", value: "in" },
       { text: "支出", value: "out" },
     ],
-    onFilter: (value, record) => record.mDirection.indexOf(value) === 0,
+    onFilter: (value, record) => {
+      record.mDirection.indexOf(value) === 0;
+    },
+    scopedSlots: { customRender: "mDirection" },
   },
   {
     title: "资金账户",
@@ -132,9 +122,9 @@ export default {
       currentPage: 1,
       sum: 0,
       pagination: {
-        position:"top",
+        position: "top",
         total: 0,
-        pageSize: 10, //每页中显示10条数据
+        pageSize: 50, //每页中显示10条数据
         showSizeChanger: true,
         pageSizeOptions: ["50", "100", "200"], //每页中显示的数据
         showTotal: (total) => `共有 ${total} 条数据`, //分页中显示总的数据
@@ -219,6 +209,27 @@ export default {
 </script>
 <style lang="less" scoped>
 .query-page {
+  .form-title {
+    padding: 2vh 2vw;
+    font-size: 120%;
+    font-weight: 800;
+  }
+  .operations-box {
+    height: 6vh;
+    background-color: #fff;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    .operations-label {
+      margin-left: 2vw;
+    }
+    .btn-box {
+      margin-left: 2vw;
+      .btn {
+        margin-right: 2vw;
+      }
+    }
+  }
   .searchBox {
     display: flex;
     height: 50px;
@@ -226,10 +237,21 @@ export default {
     align-items: center;
   }
   .my-table {
-    margin-left: 10px;
-    margin-right: 10px;
+    background-color: #fff;
+    padding: 2vh 2vw;
+    max-height: 80vh;
     overflow-y: auto;
-    max-height: 86vh;
+    .total-box {
+      background-color: #fff;
+      width: 100%;
+      height: 4vh;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 0 2vw;
+      font-size: 120%;
+      font-weight: 500;
+    }
   }
 }
 </style>
