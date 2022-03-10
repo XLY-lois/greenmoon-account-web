@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="query-page">
     <div class="searchBox">
       <div>
         <span>往来方：</span>
@@ -11,7 +11,11 @@
       </div>
       <div>
         <span>资金账户：</span>
-        <a-select style="width: 8vw" @change="setCapitalAccount" allowClear=true>
+        <a-select
+          style="width: 8vw"
+          @change="setCapitalAccount"
+          :allowClear="true"
+        >
           <a-select-option
             v-for="item in capitalAccountList"
             :key="item.value"
@@ -32,28 +36,39 @@
         </a-button>
       </div>
     </div>
-    <a-table
-      :columns="columns"
-      :data-source="billList"
-      rowKey="gid"
-      size="small"
-      bordered
-      :pagination="pagination"
-      class="my-table"
-    >
-      <template slot="action" slot-scope="text, record">
-        <a href="javascript:;" @click="showEditModal(record)">修改</a>
+    <div class="my-table">
+      <a-table
+        :columns="columns"
+        :data-source="billList"
+        rowKey="gid"
+        size="small"
+        bordered
+        :pagination="pagination"
+      >
+        <template slot="action" slot-scope="text, record">
+          <a href="javascript:;" @click="showEditModal(record)">修改</a>
 
-        <a-popconfirm
-          style="margin-left: 10px"
-          title="确认删除吗?"
-          @confirm="() => onDelete(record.key)"
-        >
-          <a href="javascript:;">删除</a>
-        </a-popconfirm>
-      </template>
-    </a-table>
-    <div>总计：{{sum}}</div>
+          <a-popconfirm
+            style="margin-left: 10px"
+            title="确认删除吗?"
+            @confirm="() => onDelete(record.key)"
+          >
+            <a href="javascript:;">删除</a>
+          </a-popconfirm>
+        </template>
+        <template slot="footer">
+          <div>总计：{{ sum }}</div>
+          <!-- <a-pagination
+            :total="pagination.total"
+            :show-total="(total) => `共有 ${total} 条数据`"
+            :page-size="pagination.pageSize"
+            :default-current="1"
+            :pageSizeOptions="pagination.pageSizeOptions"
+            :show-size-changer="true"
+          /> -->
+        </template>
+      </a-table>
+    </div>
   </div>
 </template>
 
@@ -117,8 +132,9 @@ export default {
       currentPage: 1,
       sum: 0,
       pagination: {
+        position:"top",
         total: 0,
-        pageSize: 50, //每页中显示10条数据
+        pageSize: 10, //每页中显示10条数据
         showSizeChanger: true,
         pageSizeOptions: ["50", "100", "200"], //每页中显示的数据
         showTotal: (total) => `共有 ${total} 条数据`, //分页中显示总的数据
@@ -127,7 +143,7 @@ export default {
         gid: "",
         capitalAccount: "",
         sTime: "",
-        relaEntity:"",
+        relaEntity: "",
         eTime: "",
       },
       curOperationObj: {},
@@ -173,7 +189,6 @@ export default {
         this.billList = result.getData();
         this.pagination.total = result.getData().length;
         this.sum = result.getSum();
-        console.log(this.sum);
       });
     },
     // 获取实体下拉框
@@ -203,14 +218,18 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-.searchBox {
-  display: flex;
-  height: 50px;
-  justify-content: space-evenly;
-  align-items: center;
-}
-.my-table {
-  margin-left: 10px;
-  margin-right: 10px;
+.query-page {
+  .searchBox {
+    display: flex;
+    height: 50px;
+    justify-content: space-evenly;
+    align-items: center;
+  }
+  .my-table {
+    margin-left: 10px;
+    margin-right: 10px;
+    overflow-y: auto;
+    max-height: 86vh;
+  }
 }
 </style>
