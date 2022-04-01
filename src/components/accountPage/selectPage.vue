@@ -25,7 +25,7 @@
         <a-button type="primary" class="btn" @click="selectByFilter">
           查询
         </a-button>
-        <a-button type="primary" class="btn" @click="reset"> 重置 </a-button>
+        <a-button class="btn" @click="reset"> 重置 </a-button>
       </div>
     </div>
     <div class="my-table">
@@ -56,51 +56,56 @@
         <span>合计：{{ sum }}</span>
       </div>
     </div>
+    <FormModal
+      v-show="modalVisible"
+      :curOperationObj.sync="curOperationObj"
+    >
+    </FormModal>
   </div>
 </template>
 
 <script>
 import Service from "../../utils/service";
-
+import FormModal from "./formModal.vue";
 const service = Service();
 
 const columns = [
   {
     title: "ID",
     dataIndex: "id",
+    width: "5%",
   },
   {
     title: "供应商/员工",
     dataIndex: "relaEntityName",
+    width: "10%",
   },
   {
     title: "金额",
     dataIndex: "sumMoney",
     sorter: (a, b) => a.sumMoney - b.sumMoney,
     sortDirections: ["descend", "ascend"],
+    width: "10%",
   },
   {
     title: "资金流向",
     dataIndex: "mDirection",
-    filters: [
-      { text: "收入", value: "in" },
-      { text: "支出", value: "out" },
-    ],
-    onFilter: (value, record) => {
-      record.mDirection.indexOf(value) === 0;
-    },
+    width: "10%",
     scopedSlots: { customRender: "mDirection" },
   },
   {
     title: "资金账户",
     dataIndex: "bank",
+    width: "15%",
   },
   {
     title: "内容",
     dataIndex: "content",
+    width: "20%",
   },
   {
     title: "时间",
+    width: "15%",
     dataIndex: "createdTimeStr",
     sorter: (a, b) =>
       new Date(a.createdTimeStr) > new Date(b.createdTimeStr) ? 1 : -1,
@@ -109,6 +114,7 @@ const columns = [
   {
     title: "操作",
     key: "action",
+    width: "15%",
     scopedSlots: { customRender: "action" },
   },
 ];
@@ -138,10 +144,14 @@ export default {
       },
       curOperationObj: {},
       capitalAccountList: [],
+      modalVisible: true, //编辑弹窗是否可见
     };
   },
   mounted() {
     this.init();
+  },
+  components: {
+    FormModal,
   },
   methods: {
     // 初始化
@@ -156,6 +166,7 @@ export default {
     },
     showEditModal(obj) {
       this.curOperationObj = obj;
+      this.showModal();
     },
     setCapitalAccount(value) {
       this.bill.capitalAccount = value;
@@ -203,6 +214,11 @@ export default {
         this.pagination.total = result.getData().length;
         this.sum = result.getSum();
       });
+    },
+    // 编辑弹窗唤起
+    showModal() {
+      this.modalVisible = true;
+      console.log(this.modalVisible);
     },
   },
 };
